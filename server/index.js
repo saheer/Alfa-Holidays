@@ -15,7 +15,17 @@ app.use(express.json({ limit: '10kb' }));
 
 app.get('/api/health', (_req, res) => res.json({ ok: true }));
 
-app.post('/api/subscribe', (req, res) => {
+// Tiny in-memory rate limit: 10 requests per minute per IP
+const hits = new Map();
+setInterval(() => hits.clear(), 60_000).unref();
+const limit = (req, res, next) => {
+  const n = (hits.get(req.ip) ?? 0) + 1;
+  hits.set(req.ip, n);
+  if (n > 10) return res.status(429).json({ error: 'Too many attempts. Please try again shortly.' });
+  next();
+};
+
+app.post('/api/subscribe', limit, (req, res) => {
   const email = String(req.body?.email ?? '').trim().toLowerCase();
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
     return res.status(400).json({ error: 'Enter a valid email address.' });

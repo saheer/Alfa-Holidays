@@ -1,0 +1,15 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body,
+#root {
+  height: 100%;
+  background: #0a4fa8; /* shown while the image loads */
+}
+
+body {
+  @apply font-sans text-white antialiased;
+  -webkit-font-smoothing: antialiased;
+}

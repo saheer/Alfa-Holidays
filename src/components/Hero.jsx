@@ -1,8 +1,9 @@
 import { motion } from 'framer-motion';
+import Newsletter from './Newsletter.jsx';
 
 const EASE = [0.22, 1, 0.36, 1];
 
-// One orchestrated sequence: sub-header -> heading -> divider lines -> tagline.
+// One orchestrated sequence: sub-header -> heading -> divider lines -> tagline -> newsletter.
 const container = {
   hidden: {},
   show: { transition: { delayChildren: 0.5, staggerChildren: 0.28 } },
@@ -31,7 +32,7 @@ const line = (origin) => ({
 export default function Hero() {
   return (
     <motion.section
-      className="flex flex-1 flex-col items-center justify-center pb-[24svh] pt-6 text-center md:pb-[10svh]"
+      className="flex flex-1 flex-col items-center justify-center pb-[12svh] pt-6 text-center md:pb-[4svh]"
       variants={container}
       initial="hidden"
       animate="show"
@@ -92,6 +93,10 @@ export default function Hero() {
           className="h-px flex-1 bg-white/80 md:max-w-[14rem]"
           variants={line('0%')}
         />
+      </motion.div>
+
+      <motion.div className="flex w-full justify-center" variants={fade}>
+        <Newsletter />
       </motion.div>
     </motion.section>
   );

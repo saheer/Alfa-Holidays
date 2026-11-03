@@ -3,34 +3,30 @@ import desktopBg from '../assets/images/bg-desktop.jpg';
 import mobileBg from '../assets/images/bg-mobile.jpg';
 
 /**
- * Art-directed background.
- * - Landscape / square viewports  -> desktop image (2528x1696)
- * - Portrait viewports            -> mobile image  (1788x2400)
- * The browser downloads only the one it needs, and each image is only ever
- * cropped slightly (object-cover), never stretched.
+ * Responsive CSS background.
+ * - Portrait viewports  -> mobile image
+ * - Landscape viewports -> desktop image (Tailwind's `landscape:` variant)
+ * Both URLs are passed as CSS variables, so the browser only downloads the
+ * image that actually applies.
  */
 export default function Background() {
   return (
-    <div className="absolute inset-0 -z-10" aria-hidden="true">
-      <motion.picture
-        className="block h-full w-full"
-        initial={{ scale: 1.08 }}
-        animate={{ scale: 1 }}
-        transition={{ duration: 2.4, ease: [0.22, 1, 0.36, 1] }}
-      >
-        <source media="(min-aspect-ratio: 1/1)" srcSet={desktopBg} />
-        <img
-          src={mobileBg}
-          alt=""
-          fetchpriority="high"
-          decoding="async"
-          // Mobile: keep the plane (top-right) and the town (right) in frame.
-          className="h-full w-full object-cover object-[60%_center] md:object-center"
-        />
-      </motion.picture>
+    <div className="absolute inset-0 -z-10 bg-[#04193d]" aria-hidden="true">
+      <motion.div
+        className="absolute inset-0 bg-cover bg-no-repeat bg-[position:90%_center] bg-[image:var(--bg-mobile)] landscape:bg-center landscape:bg-[image:var(--bg-desktop)]"
+        style={{
+          '--bg-mobile': `url(${mobileBg})`,
+          '--bg-desktop': `url(${desktopBg})`,
+        }}
+        initial={{ opacity: 0, scale: 1.06 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 2.2, ease: [0.22, 1, 0.36, 1] }}
+      />
 
-      {/* Soft scrim behind the type so it stays legible on any screen */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_35%_at_50%_38%,rgba(6,52,128,0.35),transparent_70%)]" />
+      {/* Dark luxury gradient: deep navy at the edges, lighter through the middle */}
+      <div className="absolute inset-0 bg-gradient-to-b from-[#030f27]/75 via-[#05204d]/30 to-[#030f27]/60" />
+      {/* Extra scrim directly behind the type block */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_75%_45%_at_50%_42%,rgba(3,15,39,0.55),transparent_75%)]" />
     </div>
   );
 }
