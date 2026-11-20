@@ -8,20 +8,24 @@ type HeroProps = {
   heroButtonText?: string | null;
   heroButtonLink?: string | null;
   heroBackground?: string | null;
+  heroBackgroundMobile?: string | null; // optional portrait artwork for phones
   heroBackgroundAlt?: string | null;
   heroAccent?: string | null; // optional foliage picture for the top-left corner
   heroAccentWidth?: number | null;
   heroAccentHeight?: number | null;
 };
 
-// Hero layout (white text on a blue scene, as in the approved design)
-//  - lg and up: the banner is a full-bleed background (right edge to right edge). A dark-blue
-//    scrim fades in from the left edge so the white headline, paragraphs and button always have
-//    strong contrast, while the aeroplane, mountain, sailboat and town on the right stay crisp.
-//  - below lg: the text sits on a solid blue gradient and the banner appears as a band UNDER it,
-//    fading into that blue at its top, so the text never covers the artwork.
-// A small dotted flight path with a plane decorates the headline (desktop and tablet), and an
-// optional foliage picture from Sanity can hang from the top-left corner.
+// Hero layout (white text on a blue travel scene, as in the approved designs)
+//  - phones (< md): the artwork fills the whole hero behind the text. A dark-blue scrim fades in
+//    from the top so the white headline and paragraphs stay readable over the sky, while the
+//    plane, mountain, sailboat and town stay crisp at the bottom, under the button. If a
+//    portrait "phone artwork" is set in Sanity it is used; otherwise the wide banner is shown
+//    as a bottom-anchored band, cropped to its right-hand side (plane and town).
+//  - tablets (md to lg): the wide banner is a full-bleed background with the text on the left
+//    over a left-to-right scrim, and the scenery filling the right.
+//  - desktop (lg and up): unchanged from before.
+// A small dotted flight path with a plane decorates the headline, and an optional foliage picture
+// from Sanity can hang from the top-left corner.
 export default function Hero({
   heroHeadingWhite,
   heroHeadingBlue,
@@ -29,6 +33,7 @@ export default function Hero({
   heroButtonText,
   heroButtonLink,
   heroBackground,
+  heroBackgroundMobile,
   heroBackgroundAlt,
   heroAccent,
   heroAccentWidth,
@@ -38,25 +43,51 @@ export default function Hero({
   const buttonLabel = heroButtonText?.replace(/\s*[→➔➜]+\s*$/u, "").trim();
 
   return (
-    <section className="relative isolate overflow-hidden bg-gradient-to-b from-[#0B4DA2] via-[#1170CF] to-[#1783E2] lg:flex lg:min-h-[clamp(640px,52vw,940px)] lg:items-center lg:bg-[#1170CF] lg:bg-none">
-      {/* Banner: a band under the text on phones/tablets, a full-bleed background on desktop */}
-      {heroBackground && (
-        <div className="relative order-2 mt-6 aspect-[4/3] w-full [-webkit-mask-image:linear-gradient(to_bottom,transparent,#000_30%)] [mask-image:linear-gradient(to_bottom,transparent,#000_30%)] sm:aspect-[16/10] md:aspect-[16/9] lg:absolute lg:inset-0 lg:-z-10 lg:mt-0 lg:aspect-auto lg:[-webkit-mask-image:none] lg:[mask-image:none]">
+    <section className="relative isolate flex min-h-[clamp(680px,100svh,900px)] flex-col overflow-hidden bg-gradient-to-b from-[#0B4DA2] via-[#1170CF] to-[#1783E2] md:min-h-[clamp(560px,72vw,720px)] md:flex-row md:items-center md:bg-[#1170CF] md:bg-none lg:min-h-[clamp(640px,52vw,940px)]">
+      {/* Phone artwork (portrait), only if one is set in Sanity */}
+      {heroBackground && heroBackgroundMobile && (
+        <div className="absolute inset-0 -z-10 md:hidden">
           <Image
-            src={heroBackground}
+            src={heroBackgroundMobile}
             alt={heroBackgroundAlt || ""}
             fill
             priority
             sizes="100vw"
-            className="object-cover object-[75%_50%] lg:object-right"
+            className="object-cover object-bottom"
           />
         </div>
       )}
 
-      {/* Scrims: left-to-right fade behind the text (desktop) and a soft top fade for the menu */}
+      {/* Wide banner: full-bleed on tablet and desktop; on phones it is the fallback, shown as a
+          bottom band that fades into the blue above it (hidden when phone artwork exists) */}
+      {heroBackground && (
+        <div
+          className={
+            heroBackgroundMobile
+              ? "absolute inset-0 -z-10 hidden md:block"
+              : "absolute inset-x-0 bottom-0 -z-10 h-[62%] [-webkit-mask-image:linear-gradient(to_bottom,transparent,#000_35%)] [mask-image:linear-gradient(to_bottom,transparent,#000_35%)] md:inset-0 md:h-auto md:[-webkit-mask-image:none] md:[mask-image:none]"
+          }
+        >
+          <Image
+            src={heroBackground}
+            alt={heroBackgroundMobile ? "" : heroBackgroundAlt || ""}
+            fill
+            priority={!heroBackgroundMobile}
+            sizes="100vw"
+            className="object-cover object-[80%_100%] md:object-right"
+          />
+        </div>
+      )}
+
+      {/* Scrims: top-down fade behind the text on phones, left-to-right on tablet and desktop,
+          plus a soft top fade for the menu */}
       <div
         aria-hidden="true"
-        className="absolute inset-0 -z-10 hidden bg-gradient-to-r from-[#032A5C]/85 via-[#0A4A9C]/45 via-[48%] to-transparent lg:block"
+        className="absolute inset-0 -z-10 bg-gradient-to-b from-[#032A5C]/85 via-[#0A4A9C]/50 via-[55%] to-transparent md:hidden"
+      />
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 -z-10 hidden bg-gradient-to-r from-[#032A5C]/85 via-[#0A4A9C]/45 via-[62%] to-transparent md:block lg:via-[48%]"
       />
       <div
         aria-hidden="true"
@@ -77,15 +108,15 @@ export default function Hero({
       )}
 
       {/* Text column: same width and side padding as the header, so the logo and headline line up */}
-      <div className="relative z-10 order-1 mx-auto w-full max-w-[1280px] px-4 pt-28 lg:px-8 lg:pb-20 lg:pt-32">
-        <div className="max-w-[620px] lg:max-w-[600px] xl:max-w-[660px]">
+      <div className="relative z-10 mx-auto w-full max-w-[1280px] px-4 pb-44 pt-28 sm:pb-52 md:pb-20 md:pt-32 lg:px-8">
+        <div className="max-w-[620px] md:max-w-[520px] lg:max-w-[600px] xl:max-w-[660px]">
           <div className="relative">
             {/* dotted flight path + plane, above-right of the headline */}
             <svg
               aria-hidden="true"
               viewBox="0 0 240 120"
               fill="none"
-              className="pointer-events-none absolute -top-9 right-0 hidden h-[88px] w-[176px] text-white/90 sm:block lg:-right-6 lg:-top-14 lg:h-[112px] lg:w-[224px]"
+              className="pointer-events-none absolute -top-8 right-0 h-[56px] w-[112px] text-white/90 sm:-top-9 sm:h-[88px] sm:w-[176px] lg:-right-6 lg:-top-14 lg:h-[112px] lg:w-[224px]"
             >
               <path
                 d="M6 112C36 62 86 38 128 42c32 3 32 32 8 30-20-2-12-22 24-34 28-9 44-14 52-18"
@@ -103,7 +134,7 @@ export default function Hero({
 
             <h1
               style={{ animationDelay: "0ms" }}
-              className="animate-fade-up text-[2.4rem] leading-[1.1] tracking-tight text-white drop-shadow-[0_2px_14px_rgba(3,42,92,0.35)] motion-reduce:animate-none sm:text-6xl lg:text-[3rem] xl:text-[3.5rem] 2xl:text-[4rem]"
+              className="animate-fade-up text-[2.4rem] leading-[1.1] tracking-tight text-white drop-shadow-[0_2px_14px_rgba(3,42,92,0.35)] motion-reduce:animate-none sm:text-5xl md:text-[3rem] lg:text-[3rem] xl:text-[3.5rem] 2xl:text-[4rem]"
             >
               <span className="block font-medium">{heroHeadingWhite}</span>
               <span className="block bg-gradient-to-r from-[#5AD0FF] to-[#27B0F5] bg-clip-text font-bold text-transparent">
@@ -117,7 +148,7 @@ export default function Hero({
             aria-hidden="true"
             viewBox="0 0 500 22"
             preserveAspectRatio="none"
-            className="mt-2 h-4 w-[82%] animate-fade-up motion-reduce:animate-none"
+            className="mt-2 h-4 w-[68%] animate-fade-up motion-reduce:animate-none sm:w-[60%] md:w-[68%] lg:w-[82%]"
             style={{ animationDelay: "100ms" }}
           >
             <path
@@ -139,7 +170,7 @@ export default function Hero({
 
           <div
             style={{ animationDelay: "200ms" }}
-            className="mt-6 max-w-[560px] animate-fade-up space-y-4 text-base leading-[1.75] text-white drop-shadow-[0_1px_8px_rgba(3,42,92,0.45)] motion-reduce:animate-none lg:mt-8 lg:text-[17px]"
+            className="mt-6 max-w-[560px] animate-fade-up space-y-4 text-[15px] leading-[1.7] text-white sm:text-base md:max-w-[480px] md:leading-[1.75] drop-shadow-[0_1px_8px_rgba(3,42,92,0.45)] motion-reduce:animate-none lg:mt-8 lg:text-[17px]"
           >
             {(heroDescription ?? []).map((p, i) => (
               <p key={i}>{p}</p>

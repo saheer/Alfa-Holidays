@@ -57,11 +57,19 @@ export default defineType({
       type: 'image',
       group: 'hero',
       description:
-        'Wide scene, 16:9 (about 1920 × 1080), with the aeroplane and town on the RIGHT. It fills the hero right up to the screen edge. A dark-blue fade is added over its left side automatically so the white text stays readable, so the picture itself should NOT be white or washed out on the left. On phones and tablets it appears below the text.',
+        'Wide scene, 16:9 (about 1920 × 1080), with the aeroplane and town on the RIGHT. It fills the hero right up to the screen edge. A dark-blue fade is added over its left side automatically so the white text stays readable, so the picture itself should NOT be white or washed out on the left. On tablets it fills the hero the same way (text on the left, scenery on the right). On phones the optional phone artwork below is used; if it is empty, the right-hand side of this picture is shown at the bottom of the hero.',
       fields: [
         defineField({name: 'alt', title: 'Alt text', type: 'string'}),
       ],
       validation: (r) => r.required(),
+    }),
+    defineField({
+      name: 'heroBackgroundMobile',
+      title: 'Phone artwork (optional, portrait)',
+      type: 'image',
+      group: 'hero',
+      description:
+        'Optional tall scene for phones, about 1080 × 1920 (9:16). Keep the sky calm in the upper half (the headline and text sit there) and put the aeroplane, mountain, sailboat and town in the lower half. It is anchored to the bottom edge. Leave empty to reuse the banner above.',
     }),
     defineField({
       name: 'heroAccent',

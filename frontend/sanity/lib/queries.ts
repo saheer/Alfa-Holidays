@@ -31,6 +31,7 @@ export const homeQuery = groq`
     heroButtonText,
     heroButtonLink,
     "heroBackground": heroBackground.asset->url,
+    "heroBackgroundMobile": heroBackgroundMobile.asset->url,
     "heroBackgroundAlt": heroBackground.alt,
     "heroAccent": heroAccent.asset->url,
     "heroAccentWidth": heroAccent.asset->metadata.dimensions.width,
